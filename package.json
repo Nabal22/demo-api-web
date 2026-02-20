@@ -16,9 +16,10 @@
     "start:rest": "tsx rest-server/src/index.ts",
     "start:graphql": "tsx graphql-server/src/index.ts",
     "start:soap": "tsx soap-server/src/index.ts",
-    "start:all": "concurrently \"npm:start:rest\" \"npm:start:graphql\" \"npm:start:soap\"",
+    "kill": "lsof -ti:3001,3002,3003,3012 | xargs kill -9 2>/dev/null; echo 'Ports libérés'",
+    "start:all": "npm run kill && concurrently \"npm:start:rest\" \"npm:start:graphql\" \"npm:start:soap\"",
     "benchmark": "tsx benchmark/src/run.ts",
-    "demo": "npm run start:all & sleep 3 && npm run benchmark && open visualize/index.html"
+    "demo": "npm run kill && npm run start:all & sleep 3 && npm run benchmark && open visualize/index.html"
   },
   "devDependencies": {
     "tsx": "^4.7.0",

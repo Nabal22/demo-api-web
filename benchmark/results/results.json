@@ -2,7 +2,7 @@
   {
     "scenario": "Requête simple",
     "api": "REST",
-    "avgLatencyMs": 0.44,
+    "avgLatencyMs": 0.43,
     "httpRequests": 1,
     "sqlQueries": 1,
     "responsePayloadBytes": 218
@@ -10,7 +10,7 @@
   {
     "scenario": "Requête simple",
     "api": "GraphQL",
-    "avgLatencyMs": 0.71,
+    "avgLatencyMs": 0.78,
     "httpRequests": 1,
     "sqlQueries": 1,
     "responsePayloadBytes": 87
@@ -18,7 +18,7 @@
   {
     "scenario": "Requête simple",
     "api": "GraphQL+DataLoader",
-    "avgLatencyMs": 0.6,
+    "avgLatencyMs": 0.64,
     "httpRequests": 1,
     "sqlQueries": 1,
     "responsePayloadBytes": 87
@@ -26,7 +26,7 @@
   {
     "scenario": "Requête simple",
     "api": "SOAP",
-    "avgLatencyMs": 0.88,
+    "avgLatencyMs": 0.97,
     "httpRequests": 1,
     "sqlQueries": 3,
     "responsePayloadBytes": 1055
@@ -34,7 +34,7 @@
   {
     "scenario": "Données liées",
     "api": "REST",
-    "avgLatencyMs": 0.85,
+    "avgLatencyMs": 0.87,
     "httpRequests": 3,
     "sqlQueries": 4,
     "responsePayloadBytes": 841
@@ -42,7 +42,7 @@
   {
     "scenario": "Données liées",
     "api": "GraphQL",
-    "avgLatencyMs": 0.66,
+    "avgLatencyMs": 0.65,
     "httpRequests": 1,
     "sqlQueries": 3,
     "responsePayloadBytes": 570
@@ -50,7 +50,7 @@
   {
     "scenario": "Données liées",
     "api": "GraphQL+DataLoader",
-    "avgLatencyMs": 0.61,
+    "avgLatencyMs": 0.66,
     "httpRequests": 1,
     "sqlQueries": 3,
     "responsePayloadBytes": 570
@@ -58,7 +58,7 @@
   {
     "scenario": "Données liées",
     "api": "SOAP",
-    "avgLatencyMs": 0.71,
+    "avgLatencyMs": 0.78,
     "httpRequests": 1,
     "sqlQueries": 3,
     "responsePayloadBytes": 1055
@@ -66,7 +66,7 @@
   {
     "scenario": "Liste avec relations",
     "api": "REST",
-    "avgLatencyMs": 0.96,
+    "avgLatencyMs": 1.1,
     "httpRequests": 4,
     "sqlQueries": 5,
     "responsePayloadBytes": 2735
@@ -82,7 +82,7 @@
   {
     "scenario": "Liste avec relations",
     "api": "GraphQL+DataLoader",
-    "avgLatencyMs": 0.68,
+    "avgLatencyMs": 0.74,
     "httpRequests": 1,
     "sqlQueries": 2,
     "responsePayloadBytes": 1492
@@ -90,7 +90,7 @@
   {
     "scenario": "Liste avec relations",
     "api": "SOAP",
-    "avgLatencyMs": 0.88,
+    "avgLatencyMs": 0.96,
     "httpRequests": 1,
     "sqlQueries": 2,
     "responsePayloadBytes": 3290

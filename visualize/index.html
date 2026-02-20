@@ -88,6 +88,7 @@
       .grid { grid-template-columns: 1fr; }
     }
   </style>
+  <!-- BENCHMARK_DATA --><script>window.__BENCHMARK_RESULTS__ = [{"scenario":"Requête simple","api":"REST","avgLatencyMs":0.43,"httpRequests":1,"sqlQueries":1,"responsePayloadBytes":218},{"scenario":"Requête simple","api":"GraphQL","avgLatencyMs":0.78,"httpRequests":1,"sqlQueries":1,"responsePayloadBytes":87},{"scenario":"Requête simple","api":"GraphQL+DataLoader","avgLatencyMs":0.64,"httpRequests":1,"sqlQueries":1,"responsePayloadBytes":87},{"scenario":"Requête simple","api":"SOAP","avgLatencyMs":0.97,"httpRequests":1,"sqlQueries":3,"responsePayloadBytes":1055},{"scenario":"Données liées","api":"REST","avgLatencyMs":0.87,"httpRequests":3,"sqlQueries":4,"responsePayloadBytes":841},{"scenario":"Données liées","api":"GraphQL","avgLatencyMs":0.65,"httpRequests":1,"sqlQueries":3,"responsePayloadBytes":570},{"scenario":"Données liées","api":"GraphQL+DataLoader","avgLatencyMs":0.66,"httpRequests":1,"sqlQueries":3,"responsePayloadBytes":570},{"scenario":"Données liées","api":"SOAP","avgLatencyMs":0.78,"httpRequests":1,"sqlQueries":3,"responsePayloadBytes":1055},{"scenario":"Liste avec relations","api":"REST","avgLatencyMs":1.1,"httpRequests":4,"sqlQueries":5,"responsePayloadBytes":2735},{"scenario":"Liste avec relations","api":"GraphQL","avgLatencyMs":0.82,"httpRequests":1,"sqlQueries":11,"responsePayloadBytes":1492},{"scenario":"Liste avec relations","api":"GraphQL+DataLoader","avgLatencyMs":0.74,"httpRequests":1,"sqlQueries":2,"responsePayloadBytes":1492},{"scenario":"Liste avec relations","api":"SOAP","avgLatencyMs":0.96,"httpRequests":1,"sqlQueries":2,"responsePayloadBytes":3290}];</script><!-- /BENCHMARK_DATA -->
 </head>
 <body>
 
@@ -138,21 +139,24 @@
     Chart.defaults.borderColor = '#334155';
 
     async function loadResults() {
-      try {
-        // Essayer de charger depuis le chemin relatif (lancé depuis la racine du projet)
-        let res = await fetch('./benchmark/results/results.json');
-        if (!res.ok) {
-          // Essayer le chemin alternatif
-          res = await fetch('../benchmark/results/results.json');
-        }
-        if (!res.ok) throw new Error('Fichier results.json introuvable');
-        return await res.json();
-      } catch (e) {
-        document.getElementById('errorMsg').style.display = 'block';
-        document.getElementById('errorMsg').textContent =
-          'Impossible de charger results.json. Lancez d\'abord : npm run benchmark';
-        throw e;
+      // 1. Données embarquées par le script de benchmark (prioritaire)
+      if (typeof window.__BENCHMARK_RESULTS__ !== 'undefined') {
+        return window.__BENCHMARK_RESULTS__;
       }
+
+      // 2. Fallback : essayer de charger via fetch (fonctionne si servi par un serveur HTTP)
+      const paths = ['../benchmark/results/results.json', './benchmark/results/results.json'];
+      for (const p of paths) {
+        try {
+          const res = await fetch(p);
+          if (res.ok) return await res.json();
+        } catch (_) { /* ignore */ }
+      }
+
+      document.getElementById('errorMsg').style.display = 'block';
+      document.getElementById('errorMsg').textContent =
+        'Impossible de charger results.json. Lancez d\'abord : npm run benchmark';
+      throw new Error('results.json introuvable');
     }
 
     function buildChart(canvasId, results, metricKey, unit) {

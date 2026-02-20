@@ -78,12 +78,30 @@ async function main() {
     }
   }
 
-  // Sauvegarder les résultats
+  // Sauvegarder les résultats en JSON
   const outputDir = path.join(__dirname, '..', 'results');
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
   const outputPath = path.join(outputDir, 'results.json');
   fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
+
+  // Injecter les résultats dans le HTML de visualisation
+  // (permet d'ouvrir le HTML directement sans serveur HTTP)
+  const htmlPath = path.join(__dirname, '..', '..', 'visualize', 'index.html');
+  if (fs.existsSync(htmlPath)) {
+    let html = fs.readFileSync(htmlPath, 'utf-8');
+    const scriptTag = `<script>window.__BENCHMARK_RESULTS__ = ${JSON.stringify(results)};</script>`;
+    // Remplacer l'injection précédente si elle existe, sinon insérer avant </head>
+    const marker = /<!-- BENCHMARK_DATA -->.*<!-- \/BENCHMARK_DATA -->/s;
+    const wrappedTag = `<!-- BENCHMARK_DATA -->${scriptTag}<!-- /BENCHMARK_DATA -->`;
+    if (marker.test(html)) {
+      html = html.replace(marker, wrappedTag);
+    } else {
+      html = html.replace('</head>', `  ${wrappedTag}\n</head>`);
+    }
+    fs.writeFileSync(htmlPath, html);
+    console.log('\n   Résultats injectés dans visualize/index.html');
+  }
 
   console.log('\n' + '='.repeat(60));
   console.log(`✅ Résultats sauvegardés dans ${outputPath}`);
