@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="BookCatalogService"
+  targetNamespace="http://localhost:3003/bookcatalog"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:tns="http://localhost:3003/bookcatalog"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Types XSD -->
+  <types>
+    <xsd:schema targetNamespace="http://localhost:3003/bookcatalog">
+
+      <xsd:complexType name="Author">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:int"/>
+          <xsd:element name="name" type="xsd:string"/>
+          <xsd:element name="bio" type="xsd:string"/>
+          <xsd:element name="nationality" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="Review">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:int"/>
+          <xsd:element name="book_id" type="xsd:int"/>
+          <xsd:element name="reviewer" type="xsd:string"/>
+          <xsd:element name="text" type="xsd:string"/>
+          <xsd:element name="rating" type="xsd:int"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="Book">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:int"/>
+          <xsd:element name="title" type="xsd:string"/>
+          <xsd:element name="year" type="xsd:int"/>
+          <xsd:element name="genre" type="xsd:string"/>
+          <xsd:element name="author_id" type="xsd:int"/>
+          <xsd:element name="author" type="tns:Author" minOccurs="0"/>
+          <xsd:element name="reviews" type="tns:Review" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="BookList">
+        <xsd:sequence>
+          <xsd:element name="book" type="tns:Book" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="AuthorWithBooks">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:int"/>
+          <xsd:element name="name" type="xsd:string"/>
+          <xsd:element name="bio" type="xsd:string"/>
+          <xsd:element name="nationality" type="xsd:string"/>
+          <xsd:element name="books" type="tns:Book" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <!-- Messages d'entrée -->
+      <xsd:element name="GetBookRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="id" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetBooksRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="limit" type="xsd:int"/>
+            <xsd:element name="offset" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetAuthorRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="id" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="AddReviewRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="bookId" type="xsd:int"/>
+            <xsd:element name="reviewer" type="xsd:string"/>
+            <xsd:element name="text" type="xsd:string"/>
+            <xsd:element name="rating" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- Messages de sortie -->
+      <xsd:element name="GetBookResponse" type="tns:Book"/>
+      <xsd:element name="GetBooksResponse" type="tns:BookList"/>
+      <xsd:element name="GetAuthorResponse" type="tns:AuthorWithBooks"/>
+      <xsd:element name="AddReviewResponse" type="tns:Review"/>
+
+    </xsd:schema>
+  </types>
+
+  <!-- Messages -->
+  <message name="GetBookInput"><part name="parameters" element="tns:GetBookRequest"/></message>
+  <message name="GetBookOutput"><part name="parameters" element="tns:GetBookResponse"/></message>
+  <message name="GetBooksInput"><part name="parameters" element="tns:GetBooksRequest"/></message>
+  <message name="GetBooksOutput"><part name="parameters" element="tns:GetBooksResponse"/></message>
+  <message name="GetAuthorInput"><part name="parameters" element="tns:GetAuthorRequest"/></message>
+  <message name="GetAuthorOutput"><part name="parameters" element="tns:GetAuthorResponse"/></message>
+  <message name="AddReviewInput"><part name="parameters" element="tns:AddReviewRequest"/></message>
+  <message name="AddReviewOutput"><part name="parameters" element="tns:AddReviewResponse"/></message>
+
+  <!-- Port Type -->
+  <portType name="BookCatalogPortType">
+    <operation name="GetBook">
+      <input message="tns:GetBookInput"/>
+      <output message="tns:GetBookOutput"/>
+    </operation>
+    <operation name="GetBooks">
+      <input message="tns:GetBooksInput"/>
+      <output message="tns:GetBooksOutput"/>
+    </operation>
+    <operation name="GetAuthor">
+      <input message="tns:GetAuthorInput"/>
+      <output message="tns:GetAuthorOutput"/>
+    </operation>
+    <operation name="AddReview">
+      <input message="tns:AddReviewInput"/>
+      <output message="tns:AddReviewOutput"/>
+    </operation>
+  </portType>
+
+  <!-- Binding SOAP -->
+  <binding name="BookCatalogBinding" type="tns:BookCatalogPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetBook">
+      <soap:operation soapAction="GetBook"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="GetBooks">
+      <soap:operation soapAction="GetBooks"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="GetAuthor">
+      <soap:operation soapAction="GetAuthor"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="AddReview">
+      <soap:operation soapAction="AddReview"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+
+  <!-- Service -->
+  <service name="BookCatalogService">
+    <port name="BookCatalogPort" binding="tns:BookCatalogBinding">
+      <soap:address location="http://localhost:3003/bookcatalog"/>
+    </port>
+  </service>
+
+</definitions>

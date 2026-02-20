@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  rest:
+    build: .
+    command: npx tsx rest-server/src/index.ts
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data.sqlite:/app/data.sqlite
+
+  graphql:
+    build: .
+    command: npx tsx graphql-server/src/index.ts
+    ports:
+      - "3002:3002"
+      - "3012:3012"
+    volumes:
+      - ./data.sqlite:/app/data.sqlite
+
+  soap:
+    build: .
+    command: npx tsx soap-server/src/index.ts
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./data.sqlite:/app/data.sqlite

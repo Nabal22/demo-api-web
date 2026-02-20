@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark — REST vs GraphQL vs SOAP</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .chart-card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .chart-card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #f1f5f9;
+    }
+
+    canvas {
+      max-height: 350px;
+    }
+
+    .legend-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .legend-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+
+    .error-msg {
+      text-align: center;
+      color: #f87171;
+      font-size: 1.2rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>REST vs GraphQL vs SOAP</h1>
+  <p class="subtitle">Benchmark comparatif — Catalogue de livres SF</p>
+
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div> REST</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#E535AB"></div> GraphQL</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div> GraphQL + DataLoader</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div> SOAP</div>
+  </div>
+
+  <div class="grid">
+    <div class="chart-card">
+      <h2>Latence moyenne (ms)</h2>
+      <canvas id="chartLatency"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Requêtes HTTP</h2>
+      <canvas id="chartHttp"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Requêtes SQL (problème N+1)</h2>
+      <canvas id="chartSql"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Taille des réponses (octets)</h2>
+      <canvas id="chartPayload"></canvas>
+    </div>
+  </div>
+
+  <p id="errorMsg" class="error-msg" style="display:none"></p>
+
+  <script>
+    // Couleurs par API
+    const API_COLORS = {
+      'REST': '#3B82F6',
+      'GraphQL': '#E535AB',
+      'GraphQL+DataLoader': '#8B5CF6',
+      'SOAP': '#F59E0B',
+    };
+
+    const API_ORDER = ['REST', 'GraphQL', 'GraphQL+DataLoader', 'SOAP'];
+
+    // Configuration globale Chart.js pour fond sombre
+    Chart.defaults.color = '#cbd5e1';
+    Chart.defaults.borderColor = '#334155';
+
+    async function loadResults() {
+      try {
+        // Essayer de charger depuis le chemin relatif (lancé depuis la racine du projet)
+        let res = await fetch('./benchmark/results/results.json');
+        if (!res.ok) {
+          // Essayer le chemin alternatif
+          res = await fetch('../benchmark/results/results.json');
+        }
+        if (!res.ok) throw new Error('Fichier results.json introuvable');
+        return await res.json();
+      } catch (e) {
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('errorMsg').textContent =
+          'Impossible de charger results.json. Lancez d\'abord : npm run benchmark';
+        throw e;
+      }
+    }
+
+    function buildChart(canvasId, results, metricKey, unit) {
+      const scenarios = [...new Set(results.map(r => r.scenario))];
+      const ctx = document.getElementById(canvasId).getContext('2d');
+
+      const datasets = API_ORDER.map(api => ({
+        label: api,
+        backgroundColor: API_COLORS[api],
+        borderRadius: 4,
+        data: scenarios.map(scenario => {
+          const entry = results.find(r => r.scenario === scenario && r.api === api);
+          return entry ? entry[metricKey] : 0;
+        }),
+      }));
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: scenarios,
+          datasets,
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y} ${unit}`,
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 14, weight: 'bold' } },
+              grid: { display: false },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                font: { size: 13 },
+                callback: (v) => `${v} ${unit}`,
+              },
+            },
+          },
+        },
+      });
+    }
+
+    // Chargement et affichage
+    loadResults().then(results => {
+      buildChart('chartLatency', results, 'avgLatencyMs', 'ms');
+      buildChart('chartHttp', results, 'httpRequests', 'req');
+      buildChart('chartSql', results, 'sqlQueries', 'SQL');
+      buildChart('chartPayload', results, 'responsePayloadBytes', 'o');
+    });
+  </script>
+
+</body>
+</html>

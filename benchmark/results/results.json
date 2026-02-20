@@ -1,0 +1,98 @@
+[
+  {
+    "scenario": "Requête simple",
+    "api": "REST",
+    "avgLatencyMs": 0.44,
+    "httpRequests": 1,
+    "sqlQueries": 1,
+    "responsePayloadBytes": 218
+  },
+  {
+    "scenario": "Requête simple",
+    "api": "GraphQL",
+    "avgLatencyMs": 0.71,
+    "httpRequests": 1,
+    "sqlQueries": 1,
+    "responsePayloadBytes": 87
+  },
+  {
+    "scenario": "Requête simple",
+    "api": "GraphQL+DataLoader",
+    "avgLatencyMs": 0.6,
+    "httpRequests": 1,
+    "sqlQueries": 1,
+    "responsePayloadBytes": 87
+  },
+  {
+    "scenario": "Requête simple",
+    "api": "SOAP",
+    "avgLatencyMs": 0.88,
+    "httpRequests": 1,
+    "sqlQueries": 3,
+    "responsePayloadBytes": 1055
+  },
+  {
+    "scenario": "Données liées",
+    "api": "REST",
+    "avgLatencyMs": 0.85,
+    "httpRequests": 3,
+    "sqlQueries": 4,
+    "responsePayloadBytes": 841
+  },
+  {
+    "scenario": "Données liées",
+    "api": "GraphQL",
+    "avgLatencyMs": 0.66,
+    "httpRequests": 1,
+    "sqlQueries": 3,
+    "responsePayloadBytes": 570
+  },
+  {
+    "scenario": "Données liées",
+    "api": "GraphQL+DataLoader",
+    "avgLatencyMs": 0.61,
+    "httpRequests": 1,
+    "sqlQueries": 3,
+    "responsePayloadBytes": 570
+  },
+  {
+    "scenario": "Données liées",
+    "api": "SOAP",
+    "avgLatencyMs": 0.71,
+    "httpRequests": 1,
+    "sqlQueries": 3,
+    "responsePayloadBytes": 1055
+  },
+  {
+    "scenario": "Liste avec relations",
+    "api": "REST",
+    "avgLatencyMs": 0.96,
+    "httpRequests": 4,
+    "sqlQueries": 5,
+    "responsePayloadBytes": 2735
+  },
+  {
+    "scenario": "Liste avec relations",
+    "api": "GraphQL",
+    "avgLatencyMs": 0.82,
+    "httpRequests": 1,
+    "sqlQueries": 11,
+    "responsePayloadBytes": 1492
+  },
+  {
+    "scenario": "Liste avec relations",
+    "api": "GraphQL+DataLoader",
+    "avgLatencyMs": 0.68,
+    "httpRequests": 1,
+    "sqlQueries": 2,
+    "responsePayloadBytes": 1492
+  },
+  {
+    "scenario": "Liste avec relations",
+    "api": "SOAP",
+    "avgLatencyMs": 0.88,
+    "httpRequests": 1,
+    "sqlQueries": 2,
+    "responsePayloadBytes": 3290
+  }
+]

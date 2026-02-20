@@ -1,0 +1,11 @@
+{
+  "name": "graphql-server",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@apollo/server": "^4.9.0",
+    "graphql": "^16.8.0",
+    "dataloader": "^2.2.0",
+    "shared": "*"
+  }
+}

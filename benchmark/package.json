@@ -1,0 +1,9 @@
+{
+  "name": "benchmark",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "soap": "^1.0.0",
+    "shared": "*"
+  }
+}
