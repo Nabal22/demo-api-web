@@ -1,5 +1,11 @@
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import { RequestHandler } from 'express';
 import { q, type Author, type Book, type Review } from '../db.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const wsdl = readFileSync(path.join(__dirname, 'BookCatalog.wsdl'), 'utf-8');
 
 function extractParam(xml: string, name: string): string | undefined {
   return xml.match(new RegExp(`<(?:tns:)?${name}[^>]*>\\s*([^<]+)\\s*</`))?.[1]?.trim();
@@ -115,38 +121,5 @@ export const soapHandler: RequestHandler = (req, res) => {
 };
 
 export const wsdlHandler: RequestHandler = (_req, res) => {
-  res.set('Content-Type', 'text/xml; charset=utf-8');
-  res.send(`<?xml version="1.0" encoding="utf-8"?>
-<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
-             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-             xmlns:tns="http://demo.api.web/BookCatalog"
-             targetNamespace="http://demo.api.web/BookCatalog"
-             name="BookCatalogService">
-  <message name="GetBookRequest"><part name="BookId" type="xsd:int"/></message>
-  <message name="GetBookResponse"><part name="Book" type="tns:Book"/></message>
-  <message name="GetBooksRequest"><part name="Limit" type="xsd:int"/><part name="Offset" type="xsd:int"/></message>
-  <message name="GetBooksResponse"><part name="Books" type="tns:ArrayOfBook"/></message>
-  <message name="GetAuthorRequest"><part name="AuthorId" type="xsd:int"/></message>
-  <message name="GetAuthorResponse"><part name="Author" type="tns:Author"/></message>
-  <message name="GetBookReviewsRequest"><part name="BookId" type="xsd:int"/></message>
-  <message name="GetBookReviewsResponse"><part name="Reviews" type="tns:ArrayOfReview"/></message>
-  <portType name="BookCatalogPortType">
-    <operation name="GetBook"><input message="tns:GetBookRequest"/><output message="tns:GetBookResponse"/></operation>
-    <operation name="GetBooks"><input message="tns:GetBooksRequest"/><output message="tns:GetBooksResponse"/></operation>
-    <operation name="GetAuthor"><input message="tns:GetAuthorRequest"/><output message="tns:GetAuthorResponse"/></operation>
-    <operation name="GetBookReviews"><input message="tns:GetBookReviewsRequest"/><output message="tns:GetBookReviewsResponse"/></operation>
-  </portType>
-  <binding name="BookCatalogBinding" type="tns:BookCatalogPortType">
-    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <operation name="GetBook"><soap:operation soapAction="GetBook"/></operation>
-    <operation name="GetBooks"><soap:operation soapAction="GetBooks"/></operation>
-    <operation name="GetAuthor"><soap:operation soapAction="GetAuthor"/></operation>
-    <operation name="GetBookReviews"><soap:operation soapAction="GetBookReviews"/></operation>
-  </binding>
-  <service name="BookCatalogService">
-    <port name="BookCatalogPort" binding="tns:BookCatalogBinding">
-      <soap:address location="http://localhost:3000/soap"/>
-    </port>
-  </service>
-</definitions>`);
+  res.set('Content-Type', 'text/xml; charset=utf-8').send(wsdl);
 };
