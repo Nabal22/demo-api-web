@@ -28,7 +28,7 @@ curl -X POST http://localhost:3000/soap \
 </Book>
 
 > Retourne TOUJOURS auteur + reviews — pas de choix possible.
-  3 SQL systématiquement (book + author + reviews), même si inutiles.
+  3 SQL (book + author + reviews).
 
 ---
 
@@ -54,7 +54,7 @@ curl http://localhost:3000/rest/books/1
 }
 
 > Champs fixes définis par le serveur. Auteur absent (lien HATEOAS uniquement).
-  1 SQL, mais données partielles > requêtes supplémentaires si besoin de l'auteur.
+  1 SQL, mais données partielles car requêtes supplémentaires si besoin de l'auteur.
 
 ---
 
