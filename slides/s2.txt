@@ -7,7 +7,7 @@
 --- Requête 1/3 ---
 
 [curl]
-$ curl http://localhost:3000/rest/books/1
+curl http://localhost:3000/rest/books/1
 
 [server]
 > GET /books/1
@@ -26,7 +26,7 @@ $ curl http://localhost:3000/rest/books/1
 --- Requête 2/3 ---
 
 [curl]
-$ curl http://localhost:3000/rest/books/1/author
+curl http://localhost:3000/rest/books/1/author
 
 [server]
 > GET /books/1/author
@@ -44,7 +44,7 @@ $ curl http://localhost:3000/rest/books/1/author
 --- Requête 3/3 ---
 
 [curl]
-$ curl http://localhost:3000/rest/books/1/reviews
+curl http://localhost:3000/rest/books/1/reviews
 
 [server]
 > GET /books/1/reviews
@@ -67,7 +67,7 @@ $ curl http://localhost:3000/rest/books/1/reviews
 === GraphQL — tout en 1 seule requête ===
 
 [curl]
-$ curl -X POST http://localhost:3000/graphql \
+curl -X POST http://localhost:3000/graphql \
     -d '{"query":"{ book(id: \"1\") { id title year genre author { name bio nationality } reviews { reviewer rating comment } } }"}'
 
 [server]

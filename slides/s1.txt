@@ -5,7 +5,7 @@
 === SOAP — POST /soap  [GetBook(id=1)] ===
 
 [curl]
-$ curl -X POST http://localhost:3000/soap \
+curl -X POST http://localhost:3000/soap \
     -H 'SOAPAction: "GetBook"' \
     -d '<...><BookId>1</BookId>...</...>'
 
@@ -37,7 +37,7 @@ $ curl -X POST http://localhost:3000/soap \
 === REST — GET /rest/books/1 ===
 
 [curl]
-$ curl http://localhost:3000/rest/books/1
+curl http://localhost:3000/rest/books/1
 
 [server]
 > GET /books/1
@@ -63,7 +63,7 @@ $ curl http://localhost:3000/rest/books/1
 === GraphQL — requête minimale (id, title, year, genre) ===
 
 [curl]
-$ curl -X POST http://localhost:3000/graphql \
+curl -X POST http://localhost:3000/graphql \
     -d '{"query":"{ book(id: \"1\") { id title year genre } }"}'
 
 [server]
@@ -81,7 +81,7 @@ $ curl -X POST http://localhost:3000/graphql \
 === GraphQL — requête complète (auteur + reviews) ===
 
 [curl]
-$ curl -X POST http://localhost:3000/graphql \
+curl -X POST http://localhost:3000/graphql \
     -d '{"query":"{ book(id: \"1\") { id title year genre author { name nationality } reviews { reviewer rating } } }"}'
 
 [server]

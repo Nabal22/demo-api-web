@@ -11,7 +11,7 @@ Avec DataLoader  > 1 SQL (livres) + 1 SQL batch tous les auteurs = 2 requêtes.
 === GraphQL — SANS DataLoader (N+1) ===
 
 [curl]
-$ curl -X POST http://localhost:3000/graphql \
+curl -X POST http://localhost:3000/graphql \
     -H 'X-Use-Dataloader: false' \
     -d '{"query":"{ books(limit: 5) { id title author { name } } }"}'
 
@@ -44,7 +44,7 @@ $ curl -X POST http://localhost:3000/graphql \
 === GraphQL — AVEC DataLoader (batch) ===
 
 [curl]
-$ curl -X POST http://localhost:3000/graphql \
+curl -X POST http://localhost:3000/graphql \
     -H 'X-Use-Dataloader: true' \
     -d '{"query":"{ books(limit: 5) { id title author { name } } }"}'
 

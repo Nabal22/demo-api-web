@@ -9,7 +9,7 @@ Objectif : lister 5 livres avec leur auteur (nom + nationalité).
 === REST — 3 requêtes HTTP (liste + 1 par auteur unique) ===
 
 [curl]
-$ curl "http://localhost:3000/rest/books?limit=5"
+curl "http://localhost:3000/rest/books?limit=5"
 
 [server]
 > GET /books
@@ -30,7 +30,7 @@ $ curl "http://localhost:3000/rest/books?limit=5"
 }
 
 [curl]
-$ curl http://localhost:3000/rest/authors/1
+curl http://localhost:3000/rest/authors/1
 
 [server]
 > GET /authors/1
@@ -41,7 +41,7 @@ $ curl http://localhost:3000/rest/authors/1
 { "id": 1, "name": "Frank Herbert", "nationality": "Américain", "bio": "..." }
 
 [curl]
-$ curl http://localhost:3000/rest/authors/2
+curl http://localhost:3000/rest/authors/2
 
 [server]
 > GET /authors/2
@@ -59,7 +59,7 @@ $ curl http://localhost:3000/rest/authors/2
 === GraphQL + DataLoader — 1 requête HTTP, 2 SQL ===
 
 [curl]
-$ curl -X POST http://localhost:3000/graphql \
+curl -X POST http://localhost:3000/graphql \
     -H 'X-Use-Dataloader: true' \
     -d '{"query":"{ books(limit: 5) { id title genre year author { name nationality } } }"}'
 
@@ -88,7 +88,7 @@ $ curl -X POST http://localhost:3000/graphql \
 === SOAP — GetBooks (1 requête HTTP, payload XML verbeux) ===
 
 [curl]
-$ curl -X POST http://localhost:3000/soap \
+curl -X POST http://localhost:3000/soap \
     -H 'SOAPAction: "GetBooks"' \
     -d '<...><Limit>5</Limit><Offset>0</Offset>...</...>'
 
