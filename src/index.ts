@@ -7,7 +7,7 @@ import { sqlCounter } from './db.js';
 import restRouter from './rest/router.js';
 import { typeDefs } from './graphql/schema.js';
 import { resolvers, createContext } from './graphql/resolvers.js';
-import { soapHandler, wsdlHandler } from './soap/service.js';
+import { registerSoap } from './soap/service.js';
 
 const app = express();
 app.use(cors());
@@ -31,12 +31,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/rest', express.json(), restRouter);
-
-app.get('/soap', wsdlHandler);
-app.post('/soap',
-  express.text({ type: ['text/xml', 'application/xml', 'application/soap+xml', '*/*'] }),
-  soapHandler
-);
+registerSoap(app);
 
 async function main() {
   const apollo = new ApolloServer({ typeDefs, resolvers });
