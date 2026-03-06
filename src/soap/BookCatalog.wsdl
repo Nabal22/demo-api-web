@@ -5,11 +5,11 @@
   et exposer le service. Les <types> XSD sont indispensables pour ça.
 -->
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
-             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-             xmlns:tns="http://demo.api.web/BookCatalog"
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-             targetNamespace="http://demo.api.web/BookCatalog"
-             name="BookCatalogService">
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+xmlns:tns="http://demo.api.web/BookCatalog"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://demo.api.web/BookCatalog"
+name="BookCatalogService">
 
   <!--
     Types XSD : définit la structure des objets échangés.
