@@ -1,0 +1,111 @@
+╔══════════════════════════════════════════════════════════════════╗
+║  SCÉNARIO 1 — GetBook(id=1) : SOAP vs REST vs GraphQL           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+=== SOAP — POST /soap  [GetBook(id=1)] ===
+
+curl -X POST http://localhost:3000/soap \
+  -H 'Content-Type: text/xml' \
+  -H 'SOAPAction: "GetBook"' \
+  -d '<soap:Envelope ...><GetBookRequest><BookId>1</BookId></GetBookRequest>...</soap:Envelope>'
+
+← 200 | 3 SQL | 853 octets | 7ms
+
+Réponse (XML) :
+<Book>
+  <Id>1</Id><Title>Dune</Title><Year>1965</Year><Genre>Space Opera</Genre>
+  <Author>
+    <Id>1</Id><Name>Frank Herbert</Name>
+    <Bio>Auteur américain, créateur de la saga Dune.</Bio>
+    <Nationality>Américain</Nationality>
+  </Author>
+  <Reviews>
+    <Review><Reviewer>Bob</Reviewer><Rating>4</Rating></Review>
+    <Review><Reviewer>Clara</Reviewer><Rating>5</Rating></Review>
+    <Review><Reviewer>David</Reviewer><Rating>4</Rating></Review>
+  </Reviews>
+</Book>
+
+→ Retourne TOUJOURS auteur + reviews — pas de choix possible.
+  3 SQL systématiquement (book + author + reviews), même si inutiles.
+
+---
+
+=== REST — GET /rest/books/1 ===
+
+curl http://localhost:3000/rest/books/1
+
+← 200 | 1 SQL | 261 octets | 2ms
+
+Réponse (JSON) :
+{
+  "id": 1, "title": "Dune", "year": 1965,
+  "genre": "Space Opera", "author_id": 1,
+  "_links": {
+    "self":    { "href": "http://localhost:3000/rest/books/1" },
+    "author":  { "href": "http://localhost:3000/rest/books/1/author" },
+    "reviews": { "href": "http://localhost:3000/rest/books/1/reviews" }
+  }
+}
+
+→ Champs fixes définis par le serveur. Auteur absent (lien HATEOAS uniquement).
+  1 SQL, mais données partielles → requêtes supplémentaires si besoin de l'auteur.
+
+---
+
+=== GraphQL — requête minimale (id, title, year, genre) ===
+
+curl -X POST http://localhost:3000/graphql \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"{ book(id: \"1\") { id title year genre } }"}'
+
+← 200 | 1 SQL | 78 octets | 12ms
+
+Réponse (JSON) :
+{
+  "data": {
+    "book": { "id": "1", "title": "Dune", "year": 1965, "genre": "Space Opera" }
+  }
+}
+
+→ Seulement ce qu'on demande. 1 SQL, réponse minimale (78 octets).
+
+---
+
+=== GraphQL — requête complète (auteur + reviews) ===
+
+curl -X POST http://localhost:3000/graphql \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"{ book(id: \"1\") { id title year genre author { name nationality } reviews { reviewer rating } } }"}'
+
+← 200 | 3 SQL | 245 octets | 4ms
+
+Réponse (JSON) :
+{
+  "data": {
+    "book": {
+      "id": "1", "title": "Dune", "year": 1965, "genre": "Space Opera",
+      "author": { "name": "Frank Herbert", "nationality": "Américain" },
+      "reviews": [
+        { "reviewer": "Bob",   "rating": 4 },
+        { "reviewer": "Clara", "rating": 5 },
+        { "reviewer": "David", "rating": 4 }
+      ]
+    }
+  }
+}
+
+→ Le client choisit exactement ce qu'il veut. Même coût SQL (3), mais
+  réponse 3,5× plus légère que SOAP (245 vs 853 octets).
+
+---
+
+BILAN S1 :
+┌──────────────────────────────┬────────┬───────────┬─────────┐
+│ Appel                        │ SQL    │ Octets    │ Latence │
+├──────────────────────────────┼────────┼───────────┼─────────┤
+│ SOAP  — GetBook(1)           │ 3 SQL  │  853 oct  │ ~7ms    │
+│ REST  — GET /rest/books/1    │ 1 SQL  │  261 oct  │ ~2ms    │
+│ GraphQL (minimal)            │ 1 SQL  │   78 oct  │ ~12ms   │
+│ GraphQL (auteur + reviews)   │ 3 SQL  │  245 oct  │ ~4ms    │
+└──────────────────────────────┴────────┴───────────┴─────────┘

@@ -1,0 +1,88 @@
+╔══════════════════════════════════════════════════════════════════╗
+║  SCÉNARIO 3 — Problème N+1 : sans vs avec DataLoader            ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Contexte : on charge 5 livres avec leur auteur.
+Sans optimisation → 1 SQL (livres) + 1 SQL PAR auteur = N+1 requêtes.
+Avec DataLoader  → 1 SQL (livres) + 1 SQL batch tous les auteurs = 2 requêtes.
+
+---
+
+=== GraphQL — SANS DataLoader (N+1) ===
+
+curl -X POST http://localhost:3000/graphql \
+  -H 'Content-Type: application/json' \
+  -H 'X-Use-Dataloader: false' \
+  -d '{"query":"{ books(limit: 5) { id title author { name } } }"}'
+
+← 200 | 6 SQL | 356 octets | ~2ms
+
+SQL exécutés côté serveur :
+  SQL: SELECT * FROM books LIMIT 5 OFFSET 0          ← 1 requête pour les livres
+  SQL: SELECT * FROM authors WHERE id = 1             ← auteur de "Dune"
+  SQL: SELECT * FROM authors WHERE id = 1             ← auteur de "Le Messie de Dune"
+  SQL: SELECT * FROM authors WHERE id = 2             ← auteur de "Fondation"
+  SQL: SELECT * FROM authors WHERE id = 2             ← auteur de "I, Robot"
+  SQL: SELECT * FROM authors WHERE id = 2             ← auteur de "Les Cavernes d'acier"
+                                               TOTAL : 1 + 5 = 6 SQL
+
+Réponse :
+{
+  "data": {
+    "books": [
+      { "id": "1", "title": "Dune",               "author": { "name": "Frank Herbert" } },
+      { "id": "2", "title": "Le Messie de Dune",  "author": { "name": "Frank Herbert" } },
+      { "id": "3", "title": "Fondation",           "author": { "name": "Isaac Asimov" } },
+      { "id": "4", "title": "I, Robot",            "author": { "name": "Isaac Asimov" } },
+      { "id": "5", "title": "Les Cavernes d'acier","author": { "name": "Isaac Asimov" } }
+    ]
+  }
+}
+
+→ Le resolver Book.author() est appelé 5 fois indépendamment.
+  Avec 100 livres → 101 SQL. Problème classique des ORM/GraphQL naïfs.
+
+---
+
+=== GraphQL — AVEC DataLoader (batch) ===
+
+curl -X POST http://localhost:3000/graphql \
+  -H 'Content-Type: application/json' \
+  -H 'X-Use-Dataloader: true' \
+  -d '{"query":"{ books(limit: 5) { id title author { name } } }"}'
+
+← 200 | 2 SQL | 356 octets | ~2ms
+
+SQL exécutés côté serveur :
+  SQL: SELECT * FROM books LIMIT 5 OFFSET 0
+  SQL: SELECT * FROM authors WHERE id IN (1, 2)      ← 1 seul batch pour tous les auteurs
+                                               TOTAL : 2 SQL
+
+Réponse (identique) :
+{
+  "data": {
+    "books": [
+      { "id": "1", "title": "Dune",               "author": { "name": "Frank Herbert" } },
+      { "id": "2", "title": "Le Messie de Dune",  "author": { "name": "Frank Herbert" } },
+      { "id": "3", "title": "Fondation",           "author": { "name": "Isaac Asimov" } },
+      { "id": "4", "title": "I, Robot",            "author": { "name": "Isaac Asimov" } },
+      { "id": "5", "title": "Les Cavernes d'acier","author": { "name": "Isaac Asimov" } }
+    ]
+  }
+}
+
+→ DataLoader regroupe les loads en 1 seul SELECT IN.
+  Même réponse, 3× moins de SQL. Avec 100 livres → toujours 2 SQL.
+
+---
+
+BILAN S3 :
+┌───────────────────────────────────┬────────┬───────────┬─────────┐
+│ Approche                          │ SQL    │ Octets    │ Latence │
+├───────────────────────────────────┼────────┼───────────┼─────────┤
+│ GraphQL sans DataLoader (N+1)     │ 6 SQL  │  356 oct  │ ~2ms    │
+│ GraphQL avec DataLoader (batch)   │ 2 SQL  │  356 oct  │ ~2ms    │
+└───────────────────────────────────┴────────┴───────────┴─────────┘
+
+Réponse identique, impact base de données radicalement différent.
+Avec N=100 livres : 101 SQL sans DL → 2 SQL avec DL.
