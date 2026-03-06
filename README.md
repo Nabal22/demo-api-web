@@ -27,3 +27,7 @@ bash scripts/s4.sh   # Comparaison finale
 ```
 
 Le header `X-Use-Dataloader: false/true` contrôle le mode DataLoader (scénarios 3 et 4).
+
+## Extraits des scripts et logs serveur.
+
+Les fichiers `extraits/s1.txt` … `extraits/s4.txt` contiennent les commandes, logs serveur et réponses.
