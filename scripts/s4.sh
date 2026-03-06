@@ -20,7 +20,6 @@ curl -s -X POST http://localhost:3000/graphql \
 echo -e "\n\n# SOAP — GetBooks (1 requête HTTP, payload XML très verbeux)"
 curl -s -X POST http://localhost:3000/soap \
   -H "Content-Type: text/xml; charset=utf-8" \
-  -H 'SOAPAction: "GetBooks"' \
   -d '<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://demo.api.web/BookCatalog"><soap:Body><tns:GetBooksRequest><Limit>5</Limit><Offset>0</Offset></tns:GetBooksRequest></soap:Body></soap:Envelope>'
 
 echo ""

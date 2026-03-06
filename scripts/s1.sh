@@ -4,7 +4,6 @@
 echo "# SOAP — GetBook(id=1) — retourne tout (auteur + reviews) même si pas demandé"
 curl -s -X POST http://localhost:3000/soap \
   -H "Content-Type: text/xml; charset=utf-8" \
-  -H 'SOAPAction: "GetBook"' \
   -d '<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://demo.api.web/BookCatalog"><soap:Body><tns:GetBookRequest><BookId>1</BookId></tns:GetBookRequest></soap:Body></soap:Envelope>'
 
 echo -e "\n\n# REST — GET /rest/books/1 — champs fixes + liens HATEOAS"

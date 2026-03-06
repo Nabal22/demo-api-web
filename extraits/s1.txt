@@ -4,8 +4,8 @@ S1 — GetBook(id=1) : SOAP vs REST vs GraphQL
 
 [curl]
 curl -X POST http://localhost:3000/soap \
-    -H 'SOAPAction: "GetBook"' \
-    -d '<...><BookId>1</BookId>...</...>'
+    -H "Content-Type: text/xml; charset=utf-8" \
+    -d '<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://demo.api.web/BookCatalog"><soap:Body><tns:GetBookRequest><BookId>1</BookId></tns:GetBookRequest></soap:Body></soap:Envelope>'
 
 [server]
 > POST /soap
@@ -102,8 +102,7 @@ curl -X POST http://localhost:3000/graphql \
   }}
 }
 
-> Le client choisit exactement ce qu'il veut. Même coût SQL (3), mais
-  réponse 3,5× plus légère que SOAP (245 vs 853 octets).
+> Le client choisit exactement ce qu'il veut. Réponse plus légère que SOAP.
 
 ---
 

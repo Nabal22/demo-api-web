@@ -35,7 +35,7 @@ curl -X POST http://localhost:3000/graphql \
 }
 
 > Le resolver Book.author() est appelé 5 fois indépendamment.
-  Avec 100 livres > 101 SQL. Problème classique des ORM/GraphQL naïfs.
+  Avec 100 livres : 101 SQL.
 
 ---
 
@@ -64,7 +64,7 @@ curl -X POST http://localhost:3000/graphql \
 }
 
 > DataLoader regroupe les loads en 1 seul SELECT IN.
-  Même réponse, 3× moins de SQL. Avec 100 livres > toujours 2 SQL.
+  Même réponse avec moins de SQL. Avec 100 livres : toujours 2 SQL.
 
 ---
 
@@ -72,5 +72,5 @@ Bilan :
   GraphQL sans DataLoader (N+1)    6 SQL   356 oct
   GraphQL avec DataLoader (batch)  2 SQL   356 oct
 
-Réponse identique, impact base de données radicalement différent.
+Réponse identique, impact base de données différent.
 Avec N=100 livres : 101 SQL sans DL > 2 SQL avec DL.
