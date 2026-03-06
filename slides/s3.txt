@@ -1,6 +1,4 @@
-╔══════════════════════════════════════════════════════════════════╗
-║  SCÉNARIO 3 — Problème N+1 : sans vs avec DataLoader            ║
-╚══════════════════════════════════════════════════════════════════╝
+S3 — Problème N+1 : sans vs avec DataLoader
 
 Contexte : on charge 5 livres avec leur auteur.
 Sans optimisation > 1 SQL (livres) + 1 SQL PAR auteur = N+1 requêtes.
@@ -8,7 +6,7 @@ Avec DataLoader  > 1 SQL (livres) + 1 SQL batch tous les auteurs = 2 requêtes.
 
 ---
 
-=== GraphQL — SANS DataLoader (N+1) ===
+# GraphQL — SANS DataLoader (N+1)
 
 [curl]
 curl -X POST http://localhost:3000/graphql \
@@ -41,7 +39,7 @@ curl -X POST http://localhost:3000/graphql \
 
 ---
 
-=== GraphQL — AVEC DataLoader (batch) ===
+# GraphQL — AVEC DataLoader (batch)
 
 [curl]
 curl -X POST http://localhost:3000/graphql \
@@ -70,13 +68,9 @@ curl -X POST http://localhost:3000/graphql \
 
 ---
 
-BILAN S3 :
-┌───────────────────────────────────┬────────┬───────────┐
-│ Approche                          │ SQL    │ Octets    │
-├───────────────────────────────────┼────────┼───────────┤
-│ GraphQL sans DataLoader (N+1)     │ 6 SQL  │  356 oct  │
-│ GraphQL avec DataLoader (batch)   │ 2 SQL  │  356 oct  │
-└───────────────────────────────────┴────────┴───────────┘
+Bilan :
+  GraphQL sans DataLoader (N+1)    6 SQL   356 oct
+  GraphQL avec DataLoader (batch)  2 SQL   356 oct
 
 Réponse identique, impact base de données radicalement différent.
 Avec N=100 livres : 101 SQL sans DL > 2 SQL avec DL.

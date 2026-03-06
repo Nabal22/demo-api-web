@@ -1,12 +1,10 @@
-╔══════════════════════════════════════════════════════════════════╗
-║  SCÉNARIO 4 — Comparaison finale : REST vs GraphQL+DL vs SOAP   ║
-╚══════════════════════════════════════════════════════════════════╝
+S4 — Comparaison finale : REST vs GraphQL+DL vs SOAP
 
 Objectif : lister 5 livres avec leur auteur (nom + nationalité).
 
 ---
 
-=== REST — 3 requêtes HTTP (liste + 1 par auteur unique) ===
+# REST — 3 requêtes HTTP (liste + 1 par auteur unique)
 
 [curl]
 curl "http://localhost:3000/rest/books?limit=5"
@@ -56,7 +54,7 @@ curl http://localhost:3000/rest/authors/2
 
 ---
 
-=== GraphQL + DataLoader — 1 requête HTTP, 2 SQL ===
+# GraphQL + DataLoader — 1 requête HTTP, 2 SQL
 
 [curl]
 curl -X POST http://localhost:3000/graphql \
@@ -85,7 +83,7 @@ curl -X POST http://localhost:3000/graphql \
 
 ---
 
-=== SOAP — GetBooks (1 requête HTTP, payload XML verbeux) ===
+# SOAP — GetBooks (1 requête HTTP, payload XML verbeux)
 
 [curl]
 curl -X POST http://localhost:3000/soap \
@@ -117,14 +115,10 @@ curl -X POST http://localhost:3000/soap \
 
 ---
 
-BILAN S4 :
-┌────────────────────────────────────┬────────────┬────────┬─────────────┐
-│ Approche                           │ Req. HTTP  │ SQL    │ Octets tot. │
-├────────────────────────────────────┼────────────┼────────┼─────────────┤
-│ REST (liste + 2 auteurs)           │ 3 HTTP req │ 4 SQL  │ ~2 048 oct  │
-│ GraphQL + DataLoader               │ 1 HTTP req │ 2 SQL  │   665 oct   │
-│ SOAP GetBooks                      │ 1 HTTP req │ 2 SQL  │ 1 580 oct   │
-└────────────────────────────────────┴────────────┴────────┴─────────────┘
+Bilan :
+  REST (liste + 2 auteurs)   3 req   4 SQL   2 048 oct
+  GraphQL + DataLoader        1 req   2 SQL     665 oct
+  SOAP GetBooks               1 req   2 SQL   1 580 oct
 
 GraphQL + DataLoader : moins de requêtes réseau, moins de SQL, payload minimal.
 SOAP : efficace côté SQL mais verbeux et rigide.

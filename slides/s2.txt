@@ -1,8 +1,6 @@
-╔══════════════════════════════════════════════════════════════════╗
-║  SCÉNARIO 2 — HATEOAS : 3 requêtes REST séquentielles vs 1 GQL ║
-╚══════════════════════════════════════════════════════════════════╝
+S2 — HATEOAS : 3 requêtes REST séquentielles vs 1 GraphQL
 
-=== REST — 3 requêtes HTTP séquentielles obligatoires ===
+# REST — 3 requêtes HTTP séquentielles obligatoires
 
 --- Requête 1/3 ---
 
@@ -64,7 +62,7 @@ curl http://localhost:3000/rest/books/1/reviews
 
 ---
 
-=== GraphQL — tout en 1 seule requête ===
+# GraphQL — tout en 1 seule requête
 
 [curl]
 curl -X POST http://localhost:3000/graphql \
@@ -94,13 +92,9 @@ curl -X POST http://localhost:3000/graphql \
 
 ---
 
-BILAN S2 :
-┌─────────────────────────────────────────┬────────────┬────────┬─────────────┐
-│ Approche                                │ Requêtes   │ SQL    │ Octets tot. │
-├─────────────────────────────────────────┼────────────┼────────┼─────────────┤
-│ REST (HATEOAS — 3 allers-retours)       │ 3 HTTP req │ 4 SQL  │  ~909 oct   │
-│ GraphQL (1 seule requête)               │ 1 HTTP req │ 3 SQL  │   419 oct   │
-└─────────────────────────────────────────┴────────────┴────────┴─────────────┘
+Bilan :
+  REST (HATEOAS — 3 allers-retours)   3 req   4 SQL   909 oct
+  GraphQL (1 seule requête)           1 req   3 SQL   419 oct
 
 HATEOAS : le client doit découvrir les URLs au runtime en suivant les liens.
 GraphQL  : le client déclare ses besoins en une requête, le serveur résout tout.
