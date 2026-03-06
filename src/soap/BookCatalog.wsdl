@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  WSDL — contrat du service SOAP BookCatalog
+  Lisible par des outils (SoapUI, wsdl2java) pour générer un client automatiquement.
+-->
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
-             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-             xmlns:tns="http://demo.api.web/BookCatalog"
-             targetNamespace="http://demo.api.web/BookCatalog"
-             name="BookCatalogService">
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+xmlns:tns="http://demo.api.web/BookCatalog"
+targetNamespace="http://demo.api.web/BookCatalog"
+name="BookCatalogService">
+
+  <!-- Types d'entrée/sortie pour chaque opération -->
   <message name="GetBookRequest"><part name="BookId" type="xsd:int"/></message>
   <message name="GetBookResponse"><part name="Book" type="tns:Book"/></message>
   <message name="GetBooksRequest"><part name="Limit" type="xsd:int"/><part name="Offset" type="xsd:int"/></message>
@@ -12,12 +18,19 @@
   <message name="GetAuthorResponse"><part name="Author" type="tns:Author"/></message>
   <message name="GetBookReviewsRequest"><part name="BookId" type="xsd:int"/></message>
   <message name="GetBookReviewsResponse"><part name="Reviews" type="tns:ArrayOfReview"/></message>
+
+  <!-- Interface abstraite : liste des opérations disponibles -->
   <portType name="BookCatalogPortType">
     <operation name="GetBook"><input message="tns:GetBookRequest"/><output message="tns:GetBookResponse"/></operation>
     <operation name="GetBooks"><input message="tns:GetBooksRequest"/><output message="tns:GetBooksResponse"/></operation>
     <operation name="GetAuthor"><input message="tns:GetAuthorRequest"/><output message="tns:GetAuthorResponse"/></operation>
     <operation name="GetBookReviews"><input message="tns:GetBookReviewsRequest"/><output message="tns:GetBookReviewsResponse"/></operation>
   </portType>
+
+  <!--
+    Connecte l'interface au protocole : SOAP sur HTTP
+    style="document" = body XML libre
+  -->
   <binding name="BookCatalogBinding" type="tns:BookCatalogPortType">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <operation name="GetBook"><soap:operation soapAction="GetBook"/></operation>
@@ -25,9 +38,12 @@
     <operation name="GetAuthor"><soap:operation soapAction="GetAuthor"/></operation>
     <operation name="GetBookReviews"><soap:operation soapAction="GetBookReviews"/></operation>
   </binding>
+
+  <!-- URL concrète du service -->
   <service name="BookCatalogService">
     <port name="BookCatalogPort" binding="tns:BookCatalogBinding">
       <soap:address location="http://localhost:3000/soap"/>
     </port>
   </service>
+
 </definitions>

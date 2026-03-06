@@ -7,10 +7,12 @@ import { q, type Author, type Book, type Review } from '../db.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const wsdl = readFileSync(path.join(__dirname, 'BookCatalog.wsdl'), 'utf-8');
 
+// Extrait la valeur d'un paramètre dans le XML de la requête ex: <tns:BookId>1</tns:BookId> → "1"
 function extractParam(xml: string, name: string): string | undefined {
   return xml.match(new RegExp(`<(?:tns:)?${name}[^>]*>\\s*([^<]+)\\s*</`))?.[1]?.trim();
 }
 
+// Enveloppe n'importe quel body dans la structure SOAP standard
 function soapResponse(body: string): string {
   return `<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -20,10 +22,13 @@ ${body}
 </soap:Envelope>`;
 }
 
+// Échappe les caractères spéciaux XML pour éviter de casser la réponse
 function escXml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// Sérialise un livre en XML — auteur et reviews inclus si fournis
+// Note : SOAP retourne toujours tout, il n'y a pas de sélection de champs possible
 function xmlBook(b: Book, author?: Author, reviews?: Review[]): string {
   const authorXml = author ? `
       <Author>
@@ -52,6 +57,7 @@ function xmlBook(b: Book, author?: Author, reviews?: Review[]): string {
       </Book>`;
 }
 
+// GetBook : 3 SQL systématiques (livre + auteur + reviews), même si le client n'en a pas besoin
 function handleGetBook(xml: string): string {
   const book = q.get<Book>('SELECT * FROM books WHERE id = ?', [extractParam(xml, 'BookId')]);
   if (!book) return soapResponse(`    <soap:Fault><faultcode>Client</faultcode><faultstring>Book not found</faultstring></soap:Fault>`);
@@ -61,6 +67,7 @@ function handleGetBook(xml: string): string {
   return soapResponse(`    <GetBookResponse>${xmlBook(book, author, reviews)}</GetBookResponse>`);
 }
 
+// GetBooks : batch des auteurs en 1 SQL via IN(...) pour éviter le N+1
 function handleGetBooks(xml: string): string {
   const limit  = parseInt(extractParam(xml, 'Limit')  ?? '10');
   const offset = parseInt(extractParam(xml, 'Offset') ?? '0');
@@ -103,6 +110,7 @@ function handleGetBookReviews(xml: string): string {
     </Reviews></GetBookReviewsResponse>`);
 }
 
+// Dispatche la requête SOAP vers le bon handler en lisant le nom de l'opération dans le XML
 export const soapHandler: RequestHandler = (req, res) => {
   const xml = req.body as string;
   const operation = xml.match(/<(?:tns:)?(\w+)\s*(?:xmlns[^>]*)?\s*>/)?.[1];
@@ -120,6 +128,7 @@ export const soapHandler: RequestHandler = (req, res) => {
   res.set('Content-Type', 'text/xml; charset=utf-8').send(responseXml);
 };
 
+// Sert le WSDL — point d'entrée pour les outils qui veulent découvrir le service
 export const wsdlHandler: RequestHandler = (_req, res) => {
   res.set('Content-Type', 'text/xml; charset=utf-8').send(wsdl);
 };
