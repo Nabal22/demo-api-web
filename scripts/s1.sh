@@ -1,6 +1,5 @@
 #!/bin/bash
 # Scénario 1 — Un livre par ID : SOAP vs REST vs GraphQL
-# Observer dans le terminal du serveur les requêtes SQL déclenchées
 
 echo "# SOAP — GetBook(id=1) — retourne tout (auteur + reviews) même si pas demandé"
 curl -s -X POST http://localhost:3000/soap \
