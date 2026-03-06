@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  WSDL — contrat du service SOAP BookCatalog
-  node-soap lit ce fichier pour gérer automatiquement la sérialisation XML
-  et exposer le service. Les <types> XSD sont indispensables pour ça.
--->
+<!-- Contrat WSDL du service BookCatalog -->
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
 xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
 xmlns:tns="http://demo.api.web/BookCatalog"
@@ -11,10 +7,7 @@ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 targetNamespace="http://demo.api.web/BookCatalog"
 name="BookCatalogService">
 
-  <!--
-    Types XSD : définit la structure des objets échangés.
-    node-soap s'en sert pour sérialiser les objets JS en XML et inversement.
-  -->
+  <!-- Types XSD des objets échangés -->
   <types>
     <xsd:schema targetNamespace="http://demo.api.web/BookCatalog">
 
@@ -36,7 +29,7 @@ name="BookCatalogService">
         </xsd:sequence>
       </xsd:complexType>
 
-      <!-- Tableau de reviews : maxOccurs="unbounded" = liste de longueur variable -->
+      <!-- Liste de reviews -->
       <xsd:complexType name="ArrayOfReview">
         <xsd:sequence>
           <xsd:element name="Review" type="tns:Review" minOccurs="0" maxOccurs="unbounded"/>
@@ -50,7 +43,7 @@ name="BookCatalogService">
           <xsd:element name="Year"     type="xsd:int"/>
           <xsd:element name="Genre"    type="xsd:string"/>
           <xsd:element name="AuthorId" type="xsd:int"/>
-          <!-- Author et Reviews toujours inclus — SOAP ne permet pas de les omettre -->
+          <!-- inclus à chaque réponse, pas de sélection possible -->
           <xsd:element name="Author"   type="tns:Author"        minOccurs="0"/>
           <xsd:element name="Reviews"  type="tns:ArrayOfReview" minOccurs="0"/>
         </xsd:sequence>
@@ -65,7 +58,7 @@ name="BookCatalogService">
     </xsd:schema>
   </types>
 
-  <!-- Messages : types d'entrée/sortie pour chaque opération -->
+  <!-- Messages -->
   <message name="GetBookRequest">    <part name="BookId" type="xsd:int"/></message>
   <message name="GetBookResponse">   <part name="Book"   type="tns:Book"/></message>
   <message name="GetBooksRequest">   <part name="Limit"  type="xsd:int"/><part name="Offset" type="xsd:int"/></message>
@@ -75,7 +68,7 @@ name="BookCatalogService">
   <message name="GetBookReviewsRequest">  <part name="BookId"  type="xsd:int"/></message>
   <message name="GetBookReviewsResponse"> <part name="Reviews" type="tns:ArrayOfReview"/></message>
 
-  <!-- Interface abstraite : liste des opérations (comme une interface TypeScript) -->
+  <!-- Interface -->
   <portType name="BookCatalogPortType">
     <operation name="GetBook">        <input message="tns:GetBookRequest"/>        <output message="tns:GetBookResponse"/></operation>
     <operation name="GetBooks">       <input message="tns:GetBooksRequest"/>       <output message="tns:GetBooksResponse"/></operation>
@@ -83,7 +76,7 @@ name="BookCatalogService">
     <operation name="GetBookReviews"> <input message="tns:GetBookReviewsRequest"/> <output message="tns:GetBookReviewsResponse"/></operation>
   </portType>
 
-  <!-- Connecte l'interface au protocole SOAP/HTTP -->
+  <!-- Binding SOAP/HTTP -->
   <binding name="BookCatalogBinding" type="tns:BookCatalogPortType">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <operation name="GetBook">        <soap:operation soapAction="GetBook"/></operation>
@@ -92,7 +85,7 @@ name="BookCatalogService">
     <operation name="GetBookReviews"> <soap:operation soapAction="GetBookReviews"/></operation>
   </binding>
 
-  <!-- URL concrète du service -->
+  <!-- Endpoint -->
   <service name="BookCatalogService">
     <port name="BookCatalogPort" binding="tns:BookCatalogBinding">
       <soap:address location="http://localhost:3000/soap"/>
