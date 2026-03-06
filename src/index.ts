@@ -16,12 +16,12 @@ app.use((req, res, next) => {
 
   const dl = req.headers['x-use-dataloader'];
   const hint = dl !== undefined ? ` (DataLoader: ${dl !== 'false' ? 'oui' : 'non'})` : '';
-  console.log(`\n→ ${req.method} ${req.path}${hint}`);
+  console.log(`\n> ${req.method} ${req.path}${hint}`);
 
   const originalSend = res.send.bind(res);
   res.send = function (body: unknown) {
     const bytes = Buffer.byteLength(typeof body === 'string' ? body : JSON.stringify(body), 'utf8');
-    console.log(`  ← ${res.statusCode} | ${sqlCounter.get()} SQL | ${bytes} octets`);
+    console.log(`  ${res.statusCode} | ${sqlCounter.get()} SQL | ${bytes} octets`);
     return originalSend(body);
   };
 

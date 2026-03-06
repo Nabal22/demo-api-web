@@ -4,20 +4,23 @@
 
 === SOAP — POST /soap  [GetBook(id=1)] ===
 
-curl -X POST http://localhost:3000/soap \
-  -H 'Content-Type: text/xml' \
-  -H 'SOAPAction: "GetBook"' \
-  -d '<soap:Envelope ...><GetBookRequest><BookId>1</BookId></GetBookRequest>...</soap:Envelope>'
+[curl]
+$ curl -X POST http://localhost:3000/soap \
+    -H 'SOAPAction: "GetBook"' \
+    -d '<...><BookId>1</BookId>...</...>'
 
-← 200 | 3 SQL | 853 octets
+[server]
+> POST /soap
+  SQL: SELECT * FROM books WHERE id = ?
+  SQL: SELECT * FROM authors WHERE id = ?
+  SQL: SELECT * FROM reviews WHERE book_id = ?
+    200 | 3 SQL | 853 octets
 
-Réponse (XML) :
+[réponse]
 <Book>
   <Id>1</Id><Title>Dune</Title><Year>1965</Year><Genre>Space Opera</Genre>
   <Author>
-    <Id>1</Id><Name>Frank Herbert</Name>
-    <Bio>Auteur américain, créateur de la saga Dune.</Bio>
-    <Nationality>Américain</Nationality>
+    <Name>Frank Herbert</Name><Nationality>Américain</Nationality>
   </Author>
   <Reviews>
     <Review><Reviewer>Bob</Reviewer><Rating>4</Rating></Review>
@@ -26,76 +29,82 @@ Réponse (XML) :
   </Reviews>
 </Book>
 
-→ Retourne TOUJOURS auteur + reviews — pas de choix possible.
+> Retourne TOUJOURS auteur + reviews — pas de choix possible.
   3 SQL systématiquement (book + author + reviews), même si inutiles.
 
 ---
 
 === REST — GET /rest/books/1 ===
 
-curl http://localhost:3000/rest/books/1
+[curl]
+$ curl http://localhost:3000/rest/books/1
 
-← 200 | 1 SQL | 261 octets
+[server]
+> GET /books/1
+  SQL: SELECT * FROM books WHERE id = ?
+    200 | 1 SQL | 261 octets
 
-Réponse (JSON) :
+[réponse]
 {
   "id": 1, "title": "Dune", "year": 1965,
   "genre": "Space Opera", "author_id": 1,
   "_links": {
-    "self":    { "href": "http://localhost:3000/rest/books/1" },
-    "author":  { "href": "http://localhost:3000/rest/books/1/author" },
-    "reviews": { "href": "http://localhost:3000/rest/books/1/reviews" }
+    "self":    { "href": ".../rest/books/1" },
+    "author":  { "href": ".../rest/books/1/author" },
+    "reviews": { "href": ".../rest/books/1/reviews" }
   }
 }
 
-→ Champs fixes définis par le serveur. Auteur absent (lien HATEOAS uniquement).
-  1 SQL, mais données partielles → requêtes supplémentaires si besoin de l'auteur.
+> Champs fixes définis par le serveur. Auteur absent (lien HATEOAS uniquement).
+  1 SQL, mais données partielles > requêtes supplémentaires si besoin de l'auteur.
 
 ---
 
 === GraphQL — requête minimale (id, title, year, genre) ===
 
-curl -X POST http://localhost:3000/graphql \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"{ book(id: \"1\") { id title year genre } }"}'
+[curl]
+$ curl -X POST http://localhost:3000/graphql \
+    -d '{"query":"{ book(id: \"1\") { id title year genre } }"}'
 
-← 200 | 1 SQL | 78 octets
+[server]
+> POST /graphql
+  SQL: SELECT * FROM books WHERE id = ?
+    200 | 1 SQL | 78 octets
 
-Réponse (JSON) :
-{
-  "data": {
-    "book": { "id": "1", "title": "Dune", "year": 1965, "genre": "Space Opera" }
-  }
-}
+[réponse]
+{"data":{"book":{"id":"1","title":"Dune","year":1965,"genre":"Space Opera"}}}
 
-→ Seulement ce qu'on demande. 1 SQL, réponse minimale (78 octets).
+> Seulement ce qu'on demande. 1 SQL, réponse minimale (78 octets).
 
 ---
 
 === GraphQL — requête complète (auteur + reviews) ===
 
-curl -X POST http://localhost:3000/graphql \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"{ book(id: \"1\") { id title year genre author { name nationality } reviews { reviewer rating } } }"}'
+[curl]
+$ curl -X POST http://localhost:3000/graphql \
+    -d '{"query":"{ book(id: \"1\") { id title year genre author { name nationality } reviews { reviewer rating } } }"}'
 
-← 200 | 3 SQL | 245 octets
+[server]
+> POST /graphql
+  SQL: SELECT * FROM books WHERE id = ?
+  SQL: SELECT * FROM authors WHERE id = ?
+  SQL: SELECT * FROM reviews WHERE book_id = ?
+    200 | 3 SQL | 245 octets
 
-Réponse (JSON) :
+[réponse]
 {
-  "data": {
-    "book": {
-      "id": "1", "title": "Dune", "year": 1965, "genre": "Space Opera",
-      "author": { "name": "Frank Herbert", "nationality": "Américain" },
-      "reviews": [
-        { "reviewer": "Bob",   "rating": 4 },
-        { "reviewer": "Clara", "rating": 5 },
-        { "reviewer": "David", "rating": 4 }
-      ]
-    }
-  }
+  "data": { "book": {
+    "id": "1", "title": "Dune", "year": 1965, "genre": "Space Opera",
+    "author": { "name": "Frank Herbert", "nationality": "Américain" },
+    "reviews": [
+      { "reviewer": "Bob", "rating": 4 },
+      { "reviewer": "Clara", "rating": 5 },
+      { "reviewer": "David", "rating": 4 }
+    ]
+  }}
 }
 
-→ Le client choisit exactement ce qu'il veut. Même coût SQL (3), mais
+> Le client choisit exactement ce qu'il veut. Même coût SQL (3), mais
   réponse 3,5× plus légère que SOAP (245 vs 853 octets).
 
 ---

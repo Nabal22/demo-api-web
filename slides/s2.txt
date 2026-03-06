@@ -4,89 +4,93 @@
 
 === REST — 3 requêtes HTTP séquentielles obligatoires ===
 
---- Requête 1/3 : GET /rest/books/1 ---
+--- Requête 1/3 ---
 
-curl http://localhost:3000/rest/books/1
+[curl]
+$ curl http://localhost:3000/rest/books/1
 
-← 200 | 1 SQL | 261 octets
+[server]
+> GET /books/1
+  SQL: SELECT * FROM books WHERE id = ?
+    200 | 1 SQL | 261 octets
 
+[réponse]
 {
-  "id": 1, "title": "Dune", "year": 1965,
-  "genre": "Space Opera", "author_id": 1,
+  "id": 1, "title": "Dune", "year": 1965, "genre": "Space Opera",
   "_links": {
-    "self":    { "href": "http://localhost:3000/rest/books/1" },
-    "author":  { "href": "http://localhost:3000/rest/books/1/author" },  ← lien vers l'auteur
-    "reviews": { "href": "http://localhost:3000/rest/books/1/reviews" }  ← lien vers les avis
+    "author":  { "href": ".../rest/books/1/author" },     on suit ce lien
+    "reviews": { "href": ".../rest/books/1/reviews" }     puis celui-ci
   }
 }
 
-→ On découvre les URLs des sous-ressources via _links (principe HATEOAS).
+--- Requête 2/3 ---
 
---- Requête 2/3 : GET /rest/books/1/author ---
+[curl]
+$ curl http://localhost:3000/rest/books/1/author
 
-curl http://localhost:3000/rest/books/1/author
+[server]
+> GET /books/1/author
+  SQL: SELECT * FROM books WHERE id = ?
+  SQL: SELECT * FROM authors WHERE id = ?
+    200 | 2 SQL | 242 octets
 
-← 200 | 2 SQL | 242 octets
-
+[réponse]
 {
   "id": 1, "name": "Frank Herbert",
   "bio": "Auteur américain, créateur de la saga Dune.",
-  "nationality": "Américain",
-  "_links": {
-    "self":  { "href": "http://localhost:3000/rest/authors/1" },
-    "books": { "href": "http://localhost:3000/rest/books?author_id=1" }
-  }
+  "nationality": "Américain"
 }
 
---- Requête 3/3 : GET /rest/books/1/reviews ---
+--- Requête 3/3 ---
 
-curl http://localhost:3000/rest/books/1/reviews
+[curl]
+$ curl http://localhost:3000/rest/books/1/reviews
 
-← 200 | 1 SQL | 406 octets
+[server]
+> GET /books/1/reviews
+  SQL: SELECT * FROM reviews WHERE book_id = ?
+    200 | 1 SQL | 406 octets
 
+[réponse]
 {
   "data": [
-    { "id": 1, "reviewer": "Bob",   "rating": 4, "comment": "Brillant et visionnaire." },
-    { "id": 2, "reviewer": "Clara", "rating": 5, "comment": "Lecture fascinante, je recommande." },
-    { "id": 3, "reviewer": "David", "rating": 4, "comment": "Chef-d'œuvre du genre." }
-  ],
-  "_links": {
-    "self": { "href": "http://localhost:3000/rest/books/1/reviews" },
-    "book": { "href": "http://localhost:3000/rest/books/1" }
-  }
+    { "reviewer": "Bob",   "rating": 4, "comment": "Brillant et visionnaire." },
+    { "reviewer": "Clara", "rating": 5, "comment": "Lecture fascinante, je recommande." },
+    { "reviewer": "David", "rating": 4, "comment": "Chef-d'œuvre du genre." }
+  ]
 }
 
-→ TOTAL REST : 3 requêtes HTTP, 4 SQL, 909 octets cumulés.
+> TOTAL REST : 3 requêtes HTTP, 4 SQL, 909 octets cumulés.
 
 ---
 
 === GraphQL — tout en 1 seule requête ===
 
-curl -X POST http://localhost:3000/graphql \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"{ book(id: \"1\") { id title year genre author { name bio nationality } reviews { reviewer rating comment } } }"}'
+[curl]
+$ curl -X POST http://localhost:3000/graphql \
+    -d '{"query":"{ book(id: \"1\") { id title year genre author { name bio nationality } reviews { reviewer rating comment } } }"}'
 
-← 200 | 3 SQL | 419 octets
+[server]
+> POST /graphql
+  SQL: SELECT * FROM books WHERE id = ?
+  SQL: SELECT * FROM authors WHERE id = ?
+  SQL: SELECT * FROM reviews WHERE book_id = ?
+    200 | 3 SQL | 419 octets
 
+[réponse]
 {
-  "data": {
-    "book": {
-      "id": "1", "title": "Dune", "year": 1965, "genre": "Space Opera",
-      "author": {
-        "name": "Frank Herbert",
-        "bio": "Auteur américain, créateur de la saga Dune.",
-        "nationality": "Américain"
-      },
-      "reviews": [
-        { "reviewer": "Bob",   "rating": 4, "comment": "Brillant et visionnaire." },
-        { "reviewer": "Clara", "rating": 5, "comment": "Lecture fascinante, je recommande." },
-        { "reviewer": "David", "rating": 4, "comment": "Chef-d'œuvre du genre." }
-      ]
-    }
-  }
+  "data": { "book": {
+    "id": "1", "title": "Dune", "year": 1965, "genre": "Space Opera",
+    "author": { "name": "Frank Herbert", "bio": "Auteur américain...", "nationality": "Américain" },
+    "reviews": [
+      { "reviewer": "Bob",   "rating": 4, "comment": "Brillant et visionnaire." },
+      { "reviewer": "Clara", "rating": 5, "comment": "Lecture fascinante, je recommande." },
+      { "reviewer": "David", "rating": 4, "comment": "Chef-d'œuvre du genre." }
+    ]
+  }}
 }
 
-→ Même résultat, 1 seul aller-retour réseau. Pas besoin de déchiffrer les liens HATEOAS.
+> Même résultat, 1 seul aller-retour réseau. Pas besoin de déchiffrer les liens HATEOAS.
 
 ---
 

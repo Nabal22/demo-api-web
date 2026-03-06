@@ -11,9 +11,9 @@ npm run dev
 
 ## Endpoints
 
-- REST → `localhost:3000/rest/books`
-- GraphQL → `localhost:3000/graphql`
-- SOAP → `localhost:3000/soap?wsdl`
+- REST - `localhost:3000/rest/books`
+- GraphQL - `localhost:3000/graphql`
+- SOAP - `localhost:3000/soap?wsdl`
 
 ## Démo
 

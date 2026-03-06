@@ -6,111 +6,114 @@ Objectif : lister 5 livres avec leur auteur (nom + nationalité).
 
 ---
 
-=== REST — plusieurs requêtes HTTP (liste + 1 par auteur unique) ===
+=== REST — 3 requêtes HTTP (liste + 1 par auteur unique) ===
 
---- Requête 1 : GET /rest/books?limit=5 ---
+[curl]
+$ curl "http://localhost:3000/rest/books?limit=5"
 
-curl "http://localhost:3000/rest/books?limit=5"
+[server]
+> GET /books
+  SQL: SELECT * FROM books LIMIT ? OFFSET ?
+  SQL: SELECT COUNT(*) as count FROM books
+    200 | 2 SQL | 1 556 octets
 
-← 200 | 2 SQL | 1 556 octets
-
+[réponse]
 {
   "data": [
-    { "id": 1, "title": "Dune",                "year": 1965, "genre": "Space Opera",  "author_id": 1,
-      "_links": { "self": "…/books/1", "author": "…/books/1/author", "reviews": "…/books/1/reviews" } },
-    { "id": 2, "title": "Le Messie de Dune",   "year": 1969, "genre": "Space Opera",  "author_id": 1,
-      "_links": { "self": "…/books/2", "author": "…/books/2/author", "reviews": "…/books/2/reviews" } },
-    { "id": 3, "title": "Fondation",           "year": 1951, "genre": "SF classique", "author_id": 2,
-      "_links": { "self": "…/books/3", "author": "…/books/3/author", "reviews": "…/books/3/reviews" } },
-    { "id": 4, "title": "I, Robot",            "year": 1950, "genre": "SF classique", "author_id": 2,
-      "_links": { ... } },
-    { "id": 5, "title": "Les Cavernes d'acier","year": 1954, "genre": "SF policière", "author_id": 2,
-      "_links": { ... } }
+    { "id": 1, "title": "Dune",                "year": 1965, "genre": "Space Opera",  "author_id": 1, "_links": { ... } },
+    { "id": 2, "title": "Le Messie de Dune",   "year": 1969, "genre": "Space Opera",  "author_id": 1, "_links": { ... } },
+    { "id": 3, "title": "Fondation",           "year": 1951, "genre": "SF classique", "author_id": 2, "_links": { ... } },
+    { "id": 4, "title": "I, Robot",            "year": 1950, "genre": "SF classique", "author_id": 2, "_links": { ... } },
+    { "id": 5, "title": "Les Cavernes d'acier","year": 1954, "genre": "SF policière", "author_id": 2, "_links": { ... } }
   ],
-  "pagination": { "limit": 5, "offset": 0, "total": 20 },
-  "_links": { "self": "…", "next": "…?offset=5" }
+  "pagination": { "limit": 5, "offset": 0, "total": 20 }
 }
 
-→ Auteurs absents. Il faut faire une requête par auteur unique pour les récupérer.
+[curl]
+$ curl http://localhost:3000/rest/authors/1
 
---- Requête 2 : GET /rest/authors/1 (Frank Herbert) ---
+[server]
+> GET /authors/1
+  SQL: SELECT * FROM authors WHERE id = ?
+    200 | 1 SQL | 242 octets
 
-curl http://localhost:3000/rest/authors/1
+[réponse]
+{ "id": 1, "name": "Frank Herbert", "nationality": "Américain", "bio": "..." }
 
-← 200 | 1 SQL | 242 octets
+[curl]
+$ curl http://localhost:3000/rest/authors/2
 
-{ "id": 1, "name": "Frank Herbert", "nationality": "Américain", "bio": "…" }
+[server]
+> GET /authors/2
+  SQL: SELECT * FROM authors WHERE id = ?
+    200 | 1 SQL | 250 octets
 
---- Requête 3 : GET /rest/authors/2 (Isaac Asimov) ---
+[réponse]
+{ "id": 2, "name": "Isaac Asimov", "nationality": "Américain", "bio": "..." }
 
-curl http://localhost:3000/rest/authors/2
-
-← 200 | 1 SQL | 250 octets
-
-{ "id": 2, "name": "Isaac Asimov", "nationality": "Américain", "bio": "…" }
-
-→ TOTAL REST : 3 requêtes HTTP, 4 SQL, 2 048 octets cumulés.
-  (Et le client doit lui-même dédupliquer les author_id et assembler les données.)
+> TOTAL REST : 3 requêtes HTTP, 4 SQL, 2 048 octets cumulés.
+  Le client doit dédupliquer les author_id et assembler les données lui-même.
 
 ---
 
 === GraphQL + DataLoader — 1 requête HTTP, 2 SQL ===
 
-curl -X POST http://localhost:3000/graphql \
-  -H 'Content-Type: application/json' \
-  -H 'X-Use-Dataloader: true' \
-  -d '{"query":"{ books(limit: 5) { id title genre year author { name nationality } } }"}'
+[curl]
+$ curl -X POST http://localhost:3000/graphql \
+    -H 'X-Use-Dataloader: true' \
+    -d '{"query":"{ books(limit: 5) { id title genre year author { name nationality } } }"}'
 
-← 200 | 2 SQL | 665 octets
+[server]
+> POST /graphql (DataLoader: oui)
+  SQL: SELECT * FROM books LIMIT ? OFFSET ?
+  SQL: SELECT * FROM authors WHERE id IN (1,2)
+    200 | 2 SQL | 665 octets
 
+[réponse]
 {
-  "data": {
-    "books": [
-      { "id": "1", "title": "Dune",               "genre": "Space Opera",  "year": 1965,
-        "author": { "name": "Frank Herbert", "nationality": "Américain" } },
-      { "id": "2", "title": "Le Messie de Dune",  "genre": "Space Opera",  "year": 1969,
-        "author": { "name": "Frank Herbert", "nationality": "Américain" } },
-      { "id": "3", "title": "Fondation",          "genre": "SF classique", "year": 1951,
-        "author": { "name": "Isaac Asimov",  "nationality": "Américain" } },
-      { "id": "4", "title": "I, Robot",           "genre": "SF classique", "year": 1950,
-        "author": { "name": "Isaac Asimov",  "nationality": "Américain" } },
-      { "id": "5", "title": "Les Cavernes d'acier","genre": "SF policière","year": 1954,
-        "author": { "name": "Isaac Asimov",  "nationality": "Américain" } }
-    ]
-  }
+  "data": { "books": [
+    { "id": "1", "title": "Dune",                "genre": "Space Opera",  "year": 1965, "author": { "name": "Frank Herbert", "nationality": "Américain" } },
+    { "id": "2", "title": "Le Messie de Dune",   "genre": "Space Opera",  "year": 1969, "author": { "name": "Frank Herbert", "nationality": "Américain" } },
+    { "id": "3", "title": "Fondation",           "genre": "SF classique", "year": 1951, "author": { "name": "Isaac Asimov",  "nationality": "Américain" } },
+    { "id": "4", "title": "I, Robot",            "genre": "SF classique", "year": 1950, "author": { "name": "Isaac Asimov",  "nationality": "Américain" } },
+    { "id": "5", "title": "Les Cavernes d'acier","genre": "SF policière", "year": 1954, "author": { "name": "Isaac Asimov",  "nationality": "Américain" } }
+  ]}
 }
 
-→ Tout en 1 aller-retour. Le serveur optimise lui-même (DataLoader batch).
+> Tout en 1 aller-retour. Le serveur optimise lui-même (DataLoader batch).
   Exactement les champs demandés, rien de plus.
 
 ---
 
-=== SOAP — GetBooks (1 requête HTTP, payload XML très verbeux) ===
+=== SOAP — GetBooks (1 requête HTTP, payload XML verbeux) ===
 
-curl -X POST http://localhost:3000/soap \
-  -H 'Content-Type: text/xml' \
-  -H 'SOAPAction: "GetBooks"' \
-  -d '<soap:Envelope ...><GetBooksRequest><Limit>5</Limit><Offset>0</Offset></GetBooksRequest>...</soap:Envelope>'
+[curl]
+$ curl -X POST http://localhost:3000/soap \
+    -H 'SOAPAction: "GetBooks"' \
+    -d '<...><Limit>5</Limit><Offset>0</Offset>...</...>'
 
-← 200 | 2 SQL | 1 580 octets
+[server]
+> POST /soap
+  SQL: SELECT * FROM books LIMIT ? OFFSET ?
+  SQL: SELECT * FROM authors WHERE id IN (1,2)
+    200 | 2 SQL | 1 580 octets
 
+[réponse]
 <Books>
-  <Book><Id>1</Id><Title>Dune</Title><Year>1965</Year><Genre>Space Opera</Genre>
-    <Author><Id>1</Id><Name>Frank Herbert</Name><Bio>Auteur américain...</Bio><Nationality>Américain</Nationality></Author>
+  <Book><Id>1</Id><Title>Dune</Title><Year>1965</Year>
+    <Author><Name>Frank Herbert</Name><Nationality>Américain</Nationality></Author>
   </Book>
-  <Book><Id>2</Id><Title>Le Messie de Dune</Title><Year>1969</Year><Genre>Space Opera</Genre>
-    <Author><Id>1</Id><Name>Frank Herbert</Name><Bio>Auteur américain...</Bio><Nationality>Américain</Nationality></Author>
+  <Book><Id>2</Id><Title>Le Messie de Dune</Title><Year>1969</Year>
+    <Author><Name>Frank Herbert</Name><Nationality>Américain</Nationality></Author>
   </Book>
-  <Book><Id>3</Id><Title>Fondation</Title><Year>1951</Year><Genre>SF classique</Genre>
-    <Author><Id>2</Id><Name>Isaac Asimov</Name><Bio>Auteur prolifique...</Bio><Nationality>Américain</Nationality></Author>
+  <Book><Id>3</Id><Title>Fondation</Title><Year>1951</Year>
+    <Author><Name>Isaac Asimov</Name><Nationality>Américain</Nationality></Author>
   </Book>
-  <Book><Id>4</Id><Title>I, Robot</Title>...</Book>
-  <Book><Id>5</Id><Title>Les Cavernes d'acier</Title>...</Book>
+  ...
 </Books>
 
-→ 1 seule requête HTTP, 2 SQL (batch côté serveur).
-  Mais format XML verbeux (1 580 octets), schéma rigide défini dans le WSDL,
-  et l'auteur est répété dans chaque livre (pas de déduplication).
+> 1 seule requête HTTP, 2 SQL. Mais format XML verbeux (1 580 octets),
+  schéma rigide, auteur répété dans chaque livre.
 
 ---
 
