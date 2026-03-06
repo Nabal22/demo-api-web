@@ -12,7 +12,7 @@ Objectif : lister 5 livres avec leur auteur (nom + nationalité).
 
 curl "http://localhost:3000/rest/books?limit=5"
 
-← 200 | 2 SQL | 1 556 octets | ~2ms
+← 200 | 2 SQL | 1 556 octets
 
 {
   "data": [
@@ -37,7 +37,7 @@ curl "http://localhost:3000/rest/books?limit=5"
 
 curl http://localhost:3000/rest/authors/1
 
-← 200 | 1 SQL | 242 octets | ~1ms
+← 200 | 1 SQL | 242 octets
 
 { "id": 1, "name": "Frank Herbert", "nationality": "Américain", "bio": "…" }
 
@@ -45,7 +45,7 @@ curl http://localhost:3000/rest/authors/1
 
 curl http://localhost:3000/rest/authors/2
 
-← 200 | 1 SQL | 250 octets | ~1ms
+← 200 | 1 SQL | 250 octets
 
 { "id": 2, "name": "Isaac Asimov", "nationality": "Américain", "bio": "…" }
 
@@ -61,7 +61,7 @@ curl -X POST http://localhost:3000/graphql \
   -H 'X-Use-Dataloader: true' \
   -d '{"query":"{ books(limit: 5) { id title genre year author { name nationality } } }"}'
 
-← 200 | 2 SQL | 665 octets | ~2ms
+← 200 | 2 SQL | 665 octets
 
 {
   "data": {
@@ -92,7 +92,7 @@ curl -X POST http://localhost:3000/soap \
   -H 'SOAPAction: "GetBooks"' \
   -d '<soap:Envelope ...><GetBooksRequest><Limit>5</Limit><Offset>0</Offset></GetBooksRequest>...</soap:Envelope>'
 
-← 200 | 2 SQL | 1 580 octets | ~2ms
+← 200 | 2 SQL | 1 580 octets
 
 <Books>
   <Book><Id>1</Id><Title>Dune</Title><Year>1965</Year><Genre>Space Opera</Genre>
@@ -115,14 +115,14 @@ curl -X POST http://localhost:3000/soap \
 ---
 
 BILAN S4 :
-┌────────────────────────────────────┬────────────┬────────┬─────────────┬──────────────┐
-│ Approche                           │ Req. HTTP  │ SQL    │ Octets tot. │ Latence tot. │
-├────────────────────────────────────┼────────────┼────────┼─────────────┼──────────────┤
-│ REST (liste + 2 auteurs)           │ 3 HTTP req │ 4 SQL  │ ~2 048 oct  │  ~4ms        │
-│ GraphQL + DataLoader               │ 1 HTTP req │ 2 SQL  │   665 oct   │  ~2ms        │
-│ SOAP GetBooks                      │ 1 HTTP req │ 2 SQL  │ 1 580 oct   │  ~2ms        │
-└────────────────────────────────────┴────────────┴────────┴─────────────┴──────────────┘
+┌────────────────────────────────────┬────────────┬────────┬─────────────┐
+│ Approche                           │ Req. HTTP  │ SQL    │ Octets tot. │
+├────────────────────────────────────┼────────────┼────────┼─────────────┤
+│ REST (liste + 2 auteurs)           │ 3 HTTP req │ 4 SQL  │ ~2 048 oct  │
+│ GraphQL + DataLoader               │ 1 HTTP req │ 2 SQL  │   665 oct   │
+│ SOAP GetBooks                      │ 1 HTTP req │ 2 SQL  │ 1 580 oct   │
+└────────────────────────────────────┴────────────┴────────┴─────────────┘
 
 GraphQL + DataLoader : moins de requêtes réseau, moins de SQL, payload minimal.
 SOAP : efficace côté SQL mais verbeux et rigide.
-REST : intuitif et cacheable, mais multiplexage manuel des ressources côté client.
+REST : intuitif et cacheable, mais assemblage manuel des ressources côté client.

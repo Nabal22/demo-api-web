@@ -15,7 +15,7 @@ curl -X POST http://localhost:3000/graphql \
   -H 'X-Use-Dataloader: false' \
   -d '{"query":"{ books(limit: 5) { id title author { name } } }"}'
 
-← 200 | 6 SQL | 356 octets | ~2ms
+← 200 | 6 SQL | 356 octets
 
 SQL exécutés côté serveur :
   SQL: SELECT * FROM books LIMIT 5 OFFSET 0          ← 1 requête pour les livres
@@ -51,7 +51,7 @@ curl -X POST http://localhost:3000/graphql \
   -H 'X-Use-Dataloader: true' \
   -d '{"query":"{ books(limit: 5) { id title author { name } } }"}'
 
-← 200 | 2 SQL | 356 octets | ~2ms
+← 200 | 2 SQL | 356 octets
 
 SQL exécutés côté serveur :
   SQL: SELECT * FROM books LIMIT 5 OFFSET 0
@@ -77,12 +77,12 @@ Réponse (identique) :
 ---
 
 BILAN S3 :
-┌───────────────────────────────────┬────────┬───────────┬─────────┐
-│ Approche                          │ SQL    │ Octets    │ Latence │
-├───────────────────────────────────┼────────┼───────────┼─────────┤
-│ GraphQL sans DataLoader (N+1)     │ 6 SQL  │  356 oct  │ ~2ms    │
-│ GraphQL avec DataLoader (batch)   │ 2 SQL  │  356 oct  │ ~2ms    │
-└───────────────────────────────────┴────────┴───────────┴─────────┘
+┌───────────────────────────────────┬────────┬───────────┐
+│ Approche                          │ SQL    │ Octets    │
+├───────────────────────────────────┼────────┼───────────┤
+│ GraphQL sans DataLoader (N+1)     │ 6 SQL  │  356 oct  │
+│ GraphQL avec DataLoader (batch)   │ 2 SQL  │  356 oct  │
+└───────────────────────────────────┴────────┴───────────┘
 
 Réponse identique, impact base de données radicalement différent.
 Avec N=100 livres : 101 SQL sans DL → 2 SQL avec DL.

@@ -12,7 +12,6 @@ import { registerSoap } from './soap/service.js';
 const app = express();
 app.use(cors());
 app.use((req, res, next) => {
-  const t0 = performance.now();
   sqlCounter.reset();
 
   const dl = req.headers['x-use-dataloader'];
@@ -21,9 +20,8 @@ app.use((req, res, next) => {
 
   const originalSend = res.send.bind(res);
   res.send = function (body: unknown) {
-    const ms    = (performance.now() - t0).toFixed(0);
     const bytes = Buffer.byteLength(typeof body === 'string' ? body : JSON.stringify(body), 'utf8');
-    console.log(`  ← ${res.statusCode} | ${sqlCounter.get()} SQL | ${bytes} octets | ${ms}ms`);
+    console.log(`  ← ${res.statusCode} | ${sqlCounter.get()} SQL | ${bytes} octets`);
     return originalSend(body);
   };
 

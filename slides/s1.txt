@@ -9,7 +9,7 @@ curl -X POST http://localhost:3000/soap \
   -H 'SOAPAction: "GetBook"' \
   -d '<soap:Envelope ...><GetBookRequest><BookId>1</BookId></GetBookRequest>...</soap:Envelope>'
 
-← 200 | 3 SQL | 853 octets | 7ms
+← 200 | 3 SQL | 853 octets
 
 Réponse (XML) :
 <Book>
@@ -35,7 +35,7 @@ Réponse (XML) :
 
 curl http://localhost:3000/rest/books/1
 
-← 200 | 1 SQL | 261 octets | 2ms
+← 200 | 1 SQL | 261 octets
 
 Réponse (JSON) :
 {
@@ -59,7 +59,7 @@ curl -X POST http://localhost:3000/graphql \
   -H 'Content-Type: application/json' \
   -d '{"query":"{ book(id: \"1\") { id title year genre } }"}'
 
-← 200 | 1 SQL | 78 octets | 12ms
+← 200 | 1 SQL | 78 octets
 
 Réponse (JSON) :
 {
@@ -78,7 +78,7 @@ curl -X POST http://localhost:3000/graphql \
   -H 'Content-Type: application/json' \
   -d '{"query":"{ book(id: \"1\") { id title year genre author { name nationality } reviews { reviewer rating } } }"}'
 
-← 200 | 3 SQL | 245 octets | 4ms
+← 200 | 3 SQL | 245 octets
 
 Réponse (JSON) :
 {
@@ -101,11 +101,11 @@ Réponse (JSON) :
 ---
 
 BILAN S1 :
-┌──────────────────────────────┬────────┬───────────┬─────────┐
-│ Appel                        │ SQL    │ Octets    │ Latence │
-├──────────────────────────────┼────────┼───────────┼─────────┤
-│ SOAP  — GetBook(1)           │ 3 SQL  │  853 oct  │ ~7ms    │
-│ REST  — GET /rest/books/1    │ 1 SQL  │  261 oct  │ ~2ms    │
-│ GraphQL (minimal)            │ 1 SQL  │   78 oct  │ ~12ms   │
-│ GraphQL (auteur + reviews)   │ 3 SQL  │  245 oct  │ ~4ms    │
-└──────────────────────────────┴────────┴───────────┴─────────┘
+┌──────────────────────────────┬────────┬───────────┐
+│ Appel                        │ SQL    │ Octets    │
+├──────────────────────────────┼────────┼───────────┤
+│ SOAP  — GetBook(1)           │ 3 SQL  │  853 oct  │
+│ REST  — GET /rest/books/1    │ 1 SQL  │  261 oct  │
+│ GraphQL (minimal)            │ 1 SQL  │   78 oct  │
+│ GraphQL (auteur + reviews)   │ 3 SQL  │  245 oct  │
+└──────────────────────────────┴────────┴───────────┘
