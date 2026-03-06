@@ -27,8 +27,10 @@ export const resolvers = {
 
   Book: {
     author(book: Book, _: unknown, ctx: GqlContext) {
-      if (ctx.useDataLoader) return ctx.authorLoader.load(String(book.author_id));
-      return q.get<Author>('SELECT * FROM authors WHERE id = ?', [book.author_id]);
+      if (ctx.useDataLoader) 
+        return ctx.authorLoader.load(String(book.author_id));
+      else 
+        return q.get<Author>('SELECT * FROM authors WHERE id = ?', [book.author_id]);
     },
     reviews(book: Book) {
       return q.all<Review>('SELECT * FROM reviews WHERE book_id = ?', [book.id]);
